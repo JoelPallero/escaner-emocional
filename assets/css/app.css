@@ -1,0 +1,43 @@
+.tab {
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+}
+.tab button {
+    background-color: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+.tab button:hover {
+    background-color: #ddd;
+}
+.tab button.active {
+    background-color: #ccc;
+}
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+.container-fluid .header{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    margin: 10px 0;
+    gap: 10px;
+    h1{
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.td-actions{
+    display: flex;
+    justify-content: start;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
