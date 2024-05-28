@@ -41,3 +41,11 @@
     flex-wrap: nowrap;
     gap: 10px;
 }
+
+.survey_select{
+    padding: 3px 24px 1px 8px !important;
+}
+
+.container:first-child:not(){
+    margin-top: 20px;
+}

@@ -101,7 +101,28 @@ function enqueue_admin_styles() {
     );
 }
 
-add_action('admin_enqueue_scripts', 'enqueue_admin_styles');
+//include Bootstrap
+
+function includeBootstrapJs($hook) {
+    if($hook != "toplevel_page_gestion-cuestionarios"){
+        return;
+    }
+    wp_enqueue_script('bootstrapJs', plugins_url('assets/bootstrap/js/bootstrap.min.js', __FILE__), array('jquery'), null, true);
+    wp_enqueue_script('NewSurveyJs', plugins_url('assets/js/new_survey.js', __FILE__), array('jquery'), null, true);
+
+}
+
+add_action('admin_enqueue_scripts', 'includeBootstrapJs');
+
+function includeBootstrapCss($hook) {
+    if($hook != "toplevel_page_gestion-cuestionarios"){
+        return;
+    }
+    wp_enqueue_style('bootstrapCSS', plugins_url('assets/bootstrap/css/bootstrap.min.css', __FILE__));
+    wp_enqueue_style('MainCSS', plugins_url('assets/css/app.css', __FILE__));
+}
+
+add_action('admin_enqueue_scripts', 'includeBootstrapCss');
 
 function render_index_page() {
     include plugin_dir_path(__FILE__) . 'templates/index.php';

@@ -18,6 +18,7 @@ function create_tables() {
     $createSurvey = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}se_survey (
         `id` INT NOT NULL AUTO_INCREMENT,
         `name` VARCHAR(45) NOT NULL,
+        `shortcode` VARCHAR(45) NOT NULL,
         `survey_category_id` INT NOT NULL,
         `date_creation` DATETIME NOT NULL,
         PRIMARY KEY (`id`),
@@ -73,7 +74,6 @@ function create_tables() {
         FOREIGN KEY (`response_id`) REFERENCES {$wpdb->prefix}se_responses(`id`)
     ) $charset_collate;";
     $wpdb->query($createUserAnswersSurvey);
-
 }
 
 function insert_initial_data() {
@@ -89,13 +89,17 @@ function insert_initial_data() {
     ]);
     $survey_category_id = $wpdb->insert_id;
 
+    // Generar shortcode único
+    $shortcode = 'survey_' . uniqid();
+
     // Crear encuesta
     $wpdb->insert("{$wpdb->prefix}se_survey", [
         'name' => 'Encuesta de Ejemplo',
+        'shortcode' => $shortcode,
         'survey_category_id' => $survey_category_id,
         'date_creation' => $date_now
     ]);
-    $survey_id = $wpdb->insert_id;    
+    $survey_id = $wpdb->insert_id;
 
     // Crear categorías de preguntas
     $child_categories = ['Categoría 1', 'Categoría 2', 'Categoría 3'];
@@ -103,7 +107,7 @@ function insert_initial_data() {
     foreach ($child_categories as $category_name) {
         $wpdb->insert("{$wpdb->prefix}se_child_category", [
             'name' => $category_name,
-            'survey_id' => $survey_category_id,
+            'survey_id' => $survey_id,
             'date_creation' => $date_now
         ]);
         $child_category_ids[] = $wpdb->insert_id;
@@ -138,3 +142,7 @@ function insert_initial_data() {
         ]);
     }
 }
+
+// Llamar a las funciones cuando el plugin se active
+register_activation_hook(__FILE__, 'create_tables');
+register_activation_hook(__FILE__, 'insert_initial_data');
