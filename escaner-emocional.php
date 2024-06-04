@@ -1,5 +1,4 @@
 <?php
-
 /*
 * Plugin Name: Escaner Emocional
 * Plugin: Ver Detalles
@@ -46,7 +45,6 @@ function Activate(){
     insert_initial_data();
 }
 
-
 function Deactivate(){
 
 }
@@ -65,7 +63,7 @@ function AsideMenuForWp(){
         //titulo del page
         'Escaner Emocional', 
         //Titulo del Menu
-        'Escaner Emocional', 
+        'Encuestas', 
         //Capability
         'manage_options',
         //slug
@@ -74,6 +72,22 @@ function AsideMenuForWp(){
         'render_index_page',
         //funcion del icono del menu
         plugin_dir_url(__FILE__).'assets/img/logo-menu.png',
+        //orden
+        '1'
+    );
+    add_submenu_page(
+        //parent slug
+        'gestion-cuestionarios', 
+        //Titulo de la pagina
+        'Nuevo Formularios', 
+        //Titulo del Submenu
+        'Añadir Formulario', 
+        //Capability
+        'manage_options',
+        //slug
+        'new-form',
+        //funcion del contenido
+        'render_new_form_page',
         //orden
         '1'
     );
@@ -103,28 +117,80 @@ function enqueue_admin_styles() {
 
 //include Bootstrap
 
-function includeBootstrapJs($hook) {
-    if($hook != "toplevel_page_gestion-cuestionarios"){
-        return;
+function includeBootstrapJs($hook) {    
+    $result = checkHookPage($hook);
+    if($result){
+        wp_enqueue_script('bootstrapJs', plugins_url('assets/bootstrap/js/bootstrap.min.js', __FILE__), array('jquery'), null, true);
+        wp_enqueue_script('NewSurveyJs', plugins_url('assets/js/new_survey.js', __FILE__), array('jquery'), null, true);
     }
-    wp_enqueue_script('bootstrapJs', plugins_url('assets/bootstrap/js/bootstrap.min.js', __FILE__), array('jquery'), null, true);
-    wp_enqueue_script('NewSurveyJs', plugins_url('assets/js/new_survey.js', __FILE__), array('jquery'), null, true);
-
 }
 
 add_action('admin_enqueue_scripts', 'includeBootstrapJs');
 
 function includeBootstrapCss($hook) {
-    if($hook != "toplevel_page_gestion-cuestionarios"){
-        return;
+    $result = checkHookPage($hook);
+    if($result){
+        wp_enqueue_style('bootstrapCSS', plugins_url('assets/bootstrap/css/bootstrap.min.css', __FILE__));
+        wp_enqueue_style('MainCSS', plugins_url('assets/css/app.css', __FILE__));
     }
-    wp_enqueue_style('bootstrapCSS', plugins_url('assets/bootstrap/css/bootstrap.min.css', __FILE__));
-    wp_enqueue_style('MainCSS', plugins_url('assets/css/app.css', __FILE__));
 }
 
 add_action('admin_enqueue_scripts', 'includeBootstrapCss');
+
+function checkHookPage($hook){
+    switch ($hook) {
+        case 'toplevel_page_gestion-cuestionarios':
+            return true;
+            break;
+        case 'encuestas_page_new-form': // Corregido el slug de la página
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+}
+
 
 function render_index_page() {
     include plugin_dir_path(__FILE__) . 'templates/index.php';
 }
 
+function render_new_form_page() {
+    include plugin_dir_path(__FILE__) . 'templates/new-form.php';
+}
+
+
+//forms ajax handler
+
+function handle_create_category_ajax() {
+    global $wpdb;
+
+    if (!isset($_POST['formData'])) {
+        wp_send_json_error(['message' => 'Datos del formulario no enviados.']);
+    }
+
+    parse_str($_POST['formData'], $formData);
+
+    $newCategory = sanitize_text_field($formData['create_survey_category']);
+
+    if (empty($newCategory)) {
+        wp_send_json_error(['message' => 'No se ha creado una categoría. Por favor, cree la categoría o elija una categoría de la lista.']);
+    }
+
+    $date_now = current_time('mysql');
+
+    $wpdb->insert("{$wpdb->prefix}se_survey_category", [
+        'name' => $newCategory,
+        'date_creation' => $date_now
+    ]);
+
+    if ($wpdb->last_error) {
+        wp_send_json_error(['message' => $wpdb->last_error]);
+    }
+
+    $newCategoryId = $wpdb->insert_id;
+
+    wp_send_json_success(['id' => $newCategoryId, 'name' => $newCategory]);
+}
+add_action('wp_ajax_create_category', 'handle_create_category_ajax');

@@ -49,3 +49,7 @@
 .container:first-child:not(){
     margin-top: 20px;
 }
+
+.textarea-scanner{
+    border: 1px solid #909090;
+}

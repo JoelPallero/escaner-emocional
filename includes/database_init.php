@@ -18,7 +18,8 @@ function create_tables() {
     $createSurvey = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}se_survey (
         `id` INT NOT NULL AUTO_INCREMENT,
         `name` VARCHAR(45) NOT NULL,
-        `shortcode` VARCHAR(45) NOT NULL,
+        `description` VARCHAR(511) NULL,
+        `shortcode` VARCHAR(255) NULL,
         `survey_category_id` INT NOT NULL,
         `date_creation` DATETIME NOT NULL,
         PRIMARY KEY (`id`),
@@ -89,17 +90,26 @@ function insert_initial_data() {
     ]);
     $survey_category_id = $wpdb->insert_id;
 
-    // Generar shortcode único
-    $shortcode = 'survey_' . uniqid();
-
     // Crear encuesta
     $wpdb->insert("{$wpdb->prefix}se_survey", [
         'name' => 'Encuesta de Ejemplo',
-        'shortcode' => $shortcode,
+        'description' => 'Descripcion de ejemplo',
+        'shortcode' => '',
         'survey_category_id' => $survey_category_id,
         'date_creation' => $date_now
     ]);
     $survey_id = $wpdb->insert_id;
+
+    // Generar shortcode único
+    $shortcode = '[emotional_scanner id=' . $survey_id . ']';
+
+    // Actualizar la encuesta con el shortcode generado
+    $wpdb->update("{$wpdb->prefix}se_survey", 
+        ['shortcode' => $shortcode], // Datos a actualizar
+        ['id' => $survey_id], // Condición WHERE
+        ['%s'], // Formato de los datos que se están actualizando
+        ['%d'] // Formato de los datos de la condición WHERE
+    );
 
     // Crear categorías de preguntas
     $child_categories = ['Categoría 1', 'Categoría 2', 'Categoría 3'];

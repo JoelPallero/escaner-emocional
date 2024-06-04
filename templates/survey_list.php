@@ -44,7 +44,7 @@ function listSurvey(){
                         '</th>' .
                         '<td>' . esc_html($survey['name']) . '</td>' .
                         '<td >' .
-                            '['.esc_html($survey['shortcode']).']' .
+                            ''.esc_html($survey['shortcode']).'' .
                         '</td>' .
                         '<td>' . esc_html($survey['category_name']) . '</td>' .
                         '<td class="">' .
